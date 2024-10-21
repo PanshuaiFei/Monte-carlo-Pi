@@ -1,0 +1,53 @@
+# 设置工作目录
+setwd("C:/Users/feips/Desktop/nwe")
+
+# 加载必要的库
+library(ggplot2)
+
+# 设置圆心坐标
+center <- c(0, 0)
+
+# 定义计算距离的函数
+dist_from_center <- function(a) {
+  sqrt(sum((a - center)^2))
+}
+
+# 循环设置 n 的值
+for (n in seq(0, 20000, by = 5)) {
+  if (n == 0) {
+    next  # 跳过 n 为 0 的情况
+  }
+  
+  # 生成随机点
+  mx <- matrix(data = runif(2 * n, min = 0, max = 1), nrow = n, ncol = 2, byrow = TRUE)
+  
+  # 计算每个点到圆心的距离
+  distance <- apply(mx, 1, dist_from_center)
+  
+  # 创建一个数据框以用于绘图
+  df <- data.frame(x = mx[, 1], y = mx[, 2], inside_circle = distance <= 1)
+  
+  # 计算π的值
+  number <- mean(distance <= 1)
+  pi_value <- 4 * number
+  
+  # 绘制散点图
+  p <- ggplot(df, aes(x = x, y = y, color = inside_circle)) +
+    geom_point(alpha = 0.4, size = 1) +
+    
+    scale_color_manual(values = c("#00C0A3","#845EC2"), labels = c("Outside Circle", "Inside Circle")) +
+    labs(
+      title = paste("Monte Carlo Simulation for π\nn =", n, "\nπ ≈", round(pi_value, 5)),
+      x = "X Coordinate",
+      y = "Y Coordinate",
+      color = "Point Status"
+    ) +
+    theme_minimal() +
+    coord_fixed() +  # 保持比例
+    xlim(0, 1) + ylim(0, 1) # 限制坐标轴范围
+  
+  
+  # 保存为 JPG 文件
+  ggsave(filename = paste0("monte_carlo_pi_n_", n, ".jpg"), plot = p, width = 8, height = 4.5)###16：9 相当于后期1920X1080
+}
+
